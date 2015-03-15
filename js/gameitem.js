@@ -12,9 +12,9 @@ define(function() {
 	/* So that we can call these properties staticly
 	 *	create these vars on the object itself
 	 */
-	GameItem.tileWidth = 101;
-	GameItem.tileHeight = 101;
-	GameItem.yPos = 83;
+	GameItem.TILE_WIDTH = 101;
+	GameItem.TILE_HEIGHT = 101;
+	GameItem.YPOS = 83;
 
 	function MoveableItem() {
 

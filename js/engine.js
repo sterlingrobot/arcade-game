@@ -1,6 +1,10 @@
-require(['app', 'resources', 'gameitem'], function(App, Resources, GameItem) {
+requirejs.config({
+    baseUrl: "/nanodegree/arcade-game/js"
+});
 
-    var Engine = function() {
+require(['./app', './resources', './gameitem'], function(App, Resources, GameItem) {
+
+    var Engine = (function() {
 
         var doc = document,
             win = window,
@@ -9,14 +13,6 @@ require(['app', 'resources', 'gameitem'], function(App, Resources, GameItem) {
             canvasBkgnd = doc.createElement('canvas'),
             ctxBkgnd = canvasBkgnd.getContext('2d'),
             lastTime;
-
-        canvas.width = App.levels[App.level].cols * GameItem.tileWidth;
-        canvas.height = App.levels[App.level].rows.length * GameItem.tileHeight;
-        canvasBkgnd.width = canvas.width;
-        canvasBkgnd.height = canvas.height;
-
-        doc.body.appendChild(canvasBkgnd);
-        doc.body.appendChild(canvas);
 
         function main() {
 
@@ -33,22 +29,34 @@ require(['app', 'resources', 'gameitem'], function(App, Resources, GameItem) {
 
         function init() {
 
-            console.log('Engine init');
+            console.log('Engine init: ' + App.levels[App.level].cols + ' x ' + App.levels[App.level].rows.length);
+
+            canvas.width = App.levels[App.level].cols * GameItem.GameItem.TILE_WIDTH;
+            canvas.height = App.levels[App.level].rows.length * GameItem.GameItem.TILE_HEIGHT;
+            canvasBkgnd.width = canvas.width;
+            canvasBkgnd.height = canvas.height;
+
+            document.body.appendChild(canvasBkgnd);
+            document.body.appendChild(canvas);
+
 
             reset();
 
             lastTime = Date.now();
 
-            var rowImages, row, col;
+            var width = GameItem.GameItem.TILE_WIDTH,
+                height = GameItem.GameItem.YPOS,
+                rowImages, row, col;
 
             for (row = 0; row < App.levels[App.level].rows.length; row++) {
                 for (col = 0; col < App.levels[App.level].cols; col++) {
                     ctxBkgnd.drawImage(Resources.get(App.rowImages[App.levels[App.level].rows[row]]),
-                        col * GameItem.tileWidth, row * GameItem.yPos);
+                        col * width, row * height);
                 }
             }
 
             main();
+
         }
 
         function update(dt) {
@@ -92,6 +100,18 @@ require(['app', 'resources', 'gameitem'], function(App, Resources, GameItem) {
 
         }
 
+        function keyHandler(e) {
+
+            var allowedKeys = {
+                37: 'left',
+                38: 'up',
+                39: 'right',
+                40: 'down'
+            };
+
+            App.player.handleInput(allowedKeys[e.keyCode]);
+        };
+
         function reset() {
             // noop
         }
@@ -102,7 +122,7 @@ require(['app', 'resources', 'gameitem'], function(App, Resources, GameItem) {
             ctxBkgnd: ctxBkgnd
         };
 
-    };
+    })();
 
     Resources.onReady(Engine.init);
 
@@ -120,7 +140,7 @@ require(['app', 'resources', 'gameitem'], function(App, Resources, GameItem) {
         'images/Star.png',
     ]);
 
-
     window.ctx = Engine.ctx;
+    window.ctxBkgnd = Engine.ctxBkgnd;
 
 });

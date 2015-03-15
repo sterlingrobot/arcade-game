@@ -1,12 +1,12 @@
-require(['gameItem', 'resources', 'app'], function(GameItem, Resources, App) {
+define(['./gameitem', './resources'], function(GameItem, Resources) {
 
-	var CollectibleItem = function() {
+	var CollectibleItem = function(rows, cols) {
 
-		GameItem.call(this);
+		GameItem.GameItem.call(this);
 
 		this.sprite = 'images/Gem Orange.png';
-		this.x = Math.floor(Math.random() * App.levels[App.level].cols) * this.tileWidth;
-		this.y = Math.floor(Math.random() * App.levels[App.level].rows.length) * this.yPos - this.yPos * 0.3;
+		this.x = Math.floor(Math.random() * cols) * this.tileWidth;
+		this.y = Math.floor(Math.random() * rows) * this.yPos - this.yPos * 0.3;
 
 		this.render = function() {
 			ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
@@ -39,8 +39,8 @@ require(['gameItem', 'resources', 'app'], function(GameItem, Resources, App) {
 
 		CollectibleItem.call(this);
 
-		this.sprite = sprites[level];
-		this.points = pointValues[level];
+		this.sprite = 'images/Key.png';
+		this.points = 200;
 	    this.radius = 30;
 	}
 

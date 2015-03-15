@@ -1,12 +1,15 @@
-require(['app'], function(App) {
+define(['./utils', './resources', './gameitem'], function(Utils, Resources, GameItem) {
 
-    var Player = function () {
+    var Player = function() {
 
-        MoveableItem.call(this);
+        GameItem.MoveableItem.call(this);
         this.radius = 25;
-        this.home = { x: 2 * this.tileWidth, y: 5 * this.yPos - this.yPos/2 };
-        this.x = this.home.x;
-        this.y = this.home.y;
+        this.home = {};
+
+        // We need a hold a pointer to this function in order to remove
+        // the listener later
+        this.keyEventHandler = this.keyHandler.bind(this);
+
     }
 
     Player.constructor = Player;
@@ -33,13 +36,13 @@ require(['app'], function(App) {
         // method is called after collision, so remove keystroke handler
         // while player is being reset
         // TODO:: custom animation to reset the player?
-        document.removeEventListener('keyup', keyHandler);
+        document.removeEventListener('keyup', self.keyEventHandler, false);
 
         self.x = self.home.x;
         self.y = self.home.y;
 
         // activate or reactivate (after collision) the keystroke handler
-        document.addEventListener('keyup', keyHandler);
+        document.addEventListener('keyup', self.keyEventHandler, false);
 
     };
 
@@ -54,13 +57,14 @@ require(['app'], function(App) {
     };
 
     Player.prototype.handleInput = function(dir) {
+
         switch(dir) {
             case 'left':
                 if(this.x - this.tileWidth < 0) return;
                 this.x -= this.tileWidth;
             break;
             case 'up':
-                if(this.y - this.yPos < 0) return;
+                if(this.y - this.yPos < 0) this.reset();
                 this.y -= this.yPos;
             break;
             case 'right':
@@ -78,7 +82,7 @@ require(['app'], function(App) {
         this.render();
     };
 
-    var keyHandler = function(e) {
+    Player.prototype.keyHandler = function(e) {
 
         var allowedKeys = {
             37: 'left',
@@ -87,7 +91,7 @@ require(['app'], function(App) {
             40: 'down'
         };
 
-        App.player.handleInput(allowedKeys[e.keyCode]);
+       this.handleInput(allowedKeys[e.keyCode]);
     };
 
     return(Player);

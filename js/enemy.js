@@ -1,18 +1,14 @@
-require(['utils', 'app'], function(Utils, App) {
+define(['./utils', './resources', './gameitem'], function(Utils, Resources, GameItem) {
 
-    var Enemy = function() {
+    var Enemy = function(tracks, cols) {
 
-        MoveableItem.call(this);
+        GameItem.MoveableItem.call(this);
 
-        var rows = App.levels[App.level].rows,
-            availableTracks = [];
-
-        for (var i = 0; i < rows.length; i++) {
-            if(rows[i] === 'stone') availableTracks.push(i);
-        }
+        this.cols = cols;
         this.sprite = 'images/enemy-bug.png';
         this.radius = 30;
-        this.track = Utils.getRandomIndex(availableTracks);
+        this.availableTracks = tracks;
+        this.track = Utils.getRandomIndex(this.availableTracks);
         this.speed = Math.ceil(Math.random() * 10) * 20;
         this.x = -this.tileWidth;
         this.y =  this.track * this.yPos - this.yPos * 0.3;
@@ -24,11 +20,12 @@ require(['utils', 'app'], function(Utils, App) {
     Enemy.prototype.update = function(dt) {
 
         this.x += this.speed * dt;
-        if(this.x > this.tileWidth * App.levels[App.level].cols) {
+        if(this.x > this.tileWidth * this.cols) {
             // restart off-screen
             this.x = -this.tileWidth;
             // pick a different route
-            this.y = Math.ceil(Math.random() * 3) * this.yPos - (this.yPos * 0.3);
+            this.track = Utils.getRandomIndex(this.availableTracks);
+            this.y = this.track * this.yPos - (this.yPos * 0.3);
         }
     };
 

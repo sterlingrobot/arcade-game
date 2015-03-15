@@ -1,50 +1,63 @@
-requirejs.config({
-    baseUrl: "/nanodegree/arcade-game/js"
-});
+define(['./player', './enemy', './collectible'], function(Player, Enemy, CollectibleItem) {
 
-require(['player', 'enemy', 'collectible'], function(Player, Enemy, CollectibleItem) {
+    var level, levels, lives, points, rowImages, collectibles, allEnemies, player, enemyTracks;
 
-    var App = function() {
+    level = 3;
+    lives = 3;
+    points = 0;
 
-        App.level = 0;
-        App.lives = 3;
-        App.points = 0;
+    rowImages = {
+        water: 'images/water-block.png',
+        stone: 'images/stone-block.png',
+        grass: 'images/grass-block.png'
+    };
 
-        App.rowImages = {
-            water: 'images/water-block.png',
-            stone: 'images/stone-block.png',
-            grass: 'images/grass-block.png'
-        };
+    levels = [
+       { rows: ['water', 'stone', 'stone', 'stone', 'grass', 'grass'], cols: 5,
+            enemies: 2, directions: [1, 1, 1], collectibles: [] },
+       { rows: ['water', 'stone', 'stone', 'grass', 'stone', 'stone', 'grass'], cols: 5,
+            enemies: 4, directions: [-1, -1, 1, 1], collectibles: [] },
+       { rows: ['water', 'stone', 'stone', 'water', 'stone', 'stone', 'grass'], cols: 5,
+            enemies: 4, directions: [1, -1, 1, -1], collectibles: ['Gem', 'Gem', 'Key'] },
+       { rows: ['water', 'stone', 'stone', 'water', 'stone', 'water', 'stone', 'grass'], cols: 5,
+            enemies: 6, directions: [-1, 1, 1, -1], collectibles: ['Gem', 'Heart', 'Star'] }
+    ];
 
-        App.levels = [
-           { rows: ['water', 'stone', 'stone', 'stone', 'grass', 'grass'], cols: 5,
-                enemies: 2, directions: [1, 1, 1], collectibles: [] },
-           { rows: ['water', 'stone', 'stone', 'grass', 'stone', 'stone', 'grass'], cols: 5,
-                enemies: 4, directions: [-1, -1, 1, 1], collectibles: [] },
-           { rows: ['water', 'stone', 'stone', 'water', 'stone', 'stone', 'grass'], cols: 5,
-                enemies: 4, directions: [1, -1, 1, -1], collectibles: ['Gem', 'Gem', 'Key'] },
-           { rows: ['water', 'stone', 'stone', 'water', 'stone', 'water', 'stone', 'grass'], cols: 5,
-                enemies: 6, directions: [-1, 1, 1, -1], collectibles: ['Gem', 'Heart', 'Star'] }
-        ];
+    collectibles = [];
 
-        App.collectibles = [];
-
-        for(var i = 0; i < levels[level].collectibles.length; i++) {
-            App.collectibles.push(eval('new ' + levels[level].collectibles[i] + '()'));
-        }
-
-        App.allEnemies = [];
-
-        for(i = 0; i < levels[level].enemies; i++) {
-            App.allEnemies.push(new Enemy());
-        }
-
-        App.player = new Player();
-
-        App.player.reset();
-
-
-        return(App);
-
+    for(var i = 0; i < levels[level].collectibles.length; i++) {
+        collectibles.push(eval('new CollectibleItem.'
+            + levels[level].collectibles[i]
+            + '(' + levels[level].rows.length
+            + levels[level].cols + ')'));
     }
+
+    allEnemies = [];
+    enemyTracks = [];
+
+    for (var i = 0; i < levels[level].rows.length; i++) {
+        if(levels[level].rows[i] === 'stone') enemyTracks.push(i);
+    }
+
+    for(i = 0; i < levels[level].enemies; i++) {
+        allEnemies.push(new Enemy(enemyTracks, levels[level].cols));
+    }
+
+    player = new Player();
+    player.home.x = Math.floor(levels[level].cols / 2) * player.tileWidth;
+    player.home.y = (levels[level].rows.length - 1) * player.yPos - player.yPos/2;
+
+    player.reset();
+
+    return {
+        level: level,
+        levels: levels,
+        lives: lives,
+        points: points,
+        rowImages: rowImages,
+        collectibles: collectibles,
+        allEnemies: allEnemies,
+        player: player
+    };
+
 });
