@@ -39,7 +39,6 @@ require(['./app', './resources', './gameitem'], function(App, Resources, GameIte
             document.body.appendChild(canvasBkgnd);
             document.body.appendChild(canvas);
 
-
             reset();
 
             lastTime = Date.now();
@@ -73,7 +72,13 @@ require(['./app', './resources', './gameitem'], function(App, Resources, GameIte
                 // if(enemy.checkCollision  (App.allEnemies)) enemy.changeTrack();
             });
             if(!collision) {
-                // if(App.player.checkCollision(App.gem)) App.gem = new Gem();
+                App.collectibles.forEach(function(collectible) {
+                    if(App.player.checkCollision(collectible)) {
+                        App.points += collectible.points;
+                        App.collectibles.splice(App.collectibles.indexOf(collectible), 1);
+                        console.log(App.points);
+                    }
+                });
                 App.player.update();
             } else {
                 App.player.reset();
@@ -100,20 +105,8 @@ require(['./app', './resources', './gameitem'], function(App, Resources, GameIte
 
         }
 
-        function keyHandler(e) {
-
-            var allowedKeys = {
-                37: 'left',
-                38: 'up',
-                39: 'right',
-                40: 'down'
-            };
-
-            App.player.handleInput(allowedKeys[e.keyCode]);
-        };
-
         function reset() {
-            // noop
+            window.scrollTo(0, canvas.height);
         }
 
         return {

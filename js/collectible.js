@@ -14,9 +14,9 @@ define(['./gameitem', './resources'], function(GameItem, Resources) {
 
 	};
 
-	var Gem = function() {
+	var Gem = function(rows, cols) {
 
-		CollectibleItem.call(this);
+		CollectibleItem.call(this, rows, cols);
 
 		var sprites = [
 			'images/Gem Blue.png',
@@ -34,24 +34,25 @@ define(['./gameitem', './resources'], function(GameItem, Resources) {
 	    this.radius = 30;
 
 	};
+	Gem.constructor = Gem;
 
-	var Key = function() {
+	var Key = function(rows, cols) {
 
-		CollectibleItem.call(this);
+		CollectibleItem.call(this, rows, cols);
 
 		this.sprite = 'images/Key.png';
 		this.points = 200;
 	    this.radius = 30;
 	}
 
-	var Heart = function() {
+	var Heart = function(rows, cols) {
 
-		CollectibleItem.call(this);
+		CollectibleItem.call(this, rows, cols);
 	}
 
-	var Star = function() {
+	var Star = function(rows, cols) {
 
-		CollectibleItem.call(this);
+		CollectibleItem.call(this, rows, cols);
 	}
 
 	return {

@@ -2,7 +2,7 @@ define(['./player', './enemy', './collectible'], function(Player, Enemy, Collect
 
     var level, levels, lives, points, rowImages, collectibles, allEnemies, player, enemyTracks;
 
-    level = 3;
+    level = 2;
     lives = 3;
     points = 0;
 
@@ -16,7 +16,7 @@ define(['./player', './enemy', './collectible'], function(Player, Enemy, Collect
        { rows: ['water', 'stone', 'stone', 'stone', 'grass', 'grass'], cols: 5,
             enemies: 2, directions: [1, 1, 1], collectibles: [] },
        { rows: ['water', 'stone', 'stone', 'grass', 'stone', 'stone', 'grass'], cols: 5,
-            enemies: 4, directions: [-1, -1, 1, 1], collectibles: [] },
+            enemies: 4, directions: [-1, -1, 1, 1], collectibles: ['Gem', 'Gem'] },
        { rows: ['water', 'stone', 'stone', 'water', 'stone', 'stone', 'grass'], cols: 5,
             enemies: 4, directions: [1, -1, 1, -1], collectibles: ['Gem', 'Gem', 'Key'] },
        { rows: ['water', 'stone', 'stone', 'water', 'stone', 'water', 'stone', 'grass'], cols: 5,
@@ -26,10 +26,12 @@ define(['./player', './enemy', './collectible'], function(Player, Enemy, Collect
     collectibles = [];
 
     for(var i = 0; i < levels[level].collectibles.length; i++) {
-        collectibles.push(eval('new CollectibleItem.'
+        var collectible = 'new CollectibleItem.'
             + levels[level].collectibles[i]
             + '(' + levels[level].rows.length
-            + levels[level].cols + ')'));
+            + ',' + levels[level].cols + ')';
+
+        collectibles.push(eval(collectible));
     }
 
     allEnemies = [];

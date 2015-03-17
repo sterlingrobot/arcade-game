@@ -6,7 +6,7 @@ define(['./utils', './resources', './gameitem'], function(Utils, Resources, Game
         this.radius = 25;
         this.home = {};
 
-        // We need a hold a pointer to this function in order to remove
+        // We need to hold a pointer to this function in order to remove
         // the listener later
         this.keyEventHandler = this.keyHandler.bind(this);
 
@@ -46,14 +46,14 @@ define(['./utils', './resources', './gameitem'], function(Utils, Resources, Game
 
     };
 
-    Player.prototype.checkCollision = function(enemy) {
+    Player.prototype.checkCollision = function(object) {
 
         var self =this,
-            dx = (self.x + self.radius) - (enemy.x + enemy.radius),
-            dy = (self.y + self.yPos/2 + self.radius) - (enemy.y + enemy.radius),
+            dx = (self.x + self.radius) - (object.x + object.radius),
+            dy = (self.y + self.yPos/2 + self.radius) - (object.y + object.radius),
             distance = Math.sqrt(dx * dx + dy * dy);
 
-        return distance < self.radius + enemy.radius;
+        return distance < self.radius + object.radius;
     };
 
     Player.prototype.handleInput = function(dir) {
@@ -65,14 +65,14 @@ define(['./utils', './resources', './gameitem'], function(Utils, Resources, Game
             break;
             case 'up':
                 if(this.y - this.yPos < 0) this.reset();
-                this.y -= this.yPos;
+                else this.y -= this.yPos;
             break;
             case 'right':
                 if(this.x + this.tileWidth > 505 - this.tileWidth) return;
                 this.x += this.tileWidth;
             break;
             case 'down':
-                if(this.y + this.yPos > 606 - (this.yPos * 2)) return;
+                if(this.y + this.yPos > this.home.y) return;
                 this.y += this.yPos;
             break;
             default:
