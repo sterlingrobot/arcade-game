@@ -2,7 +2,7 @@ requirejs.config({
     baseUrl: "/nanodegree/arcade-game/js"
 });
 
-require(['./app', './resources', './gameitem'], function(App, Resources, GameItem) {
+require(['./app', './resources'], function(App, Resources) {
 
     var Engine = (function() {
 
@@ -12,7 +12,16 @@ require(['./app', './resources', './gameitem'], function(App, Resources, GameIte
             ctx = canvas.getContext('2d'),
             canvasBkgnd = doc.createElement('canvas'),
             ctxBkgnd = canvasBkgnd.getContext('2d'),
-            lastTime;
+            canvasInfo = doc.createElement('canvas'),
+            ctxInfo = canvasInfo.getContext('2d'),
+            score = doc.getElementById('score'),
+            lives = doc.getElementById('lives'),
+            info, lastTime;
+
+        info = doc.body.appendChild(canvasInfo);
+        info.id = "info";
+        doc.body.appendChild(canvasBkgnd);
+        doc.body.appendChild(canvas);
 
         function main() {
 
@@ -31,21 +40,20 @@ require(['./app', './resources', './gameitem'], function(App, Resources, GameIte
 
             console.log('Engine init: ' + App.levels[App.level].cols + ' x ' + App.levels[App.level].rows.length);
 
-            canvas.width = App.levels[App.level].cols * GameItem.GameItem.TILE_WIDTH;
-            canvas.height = App.levels[App.level].rows.length * GameItem.GameItem.TILE_HEIGHT;
+            canvas.width = App.levels[App.level].cols * App.TILE_WIDTH;
+            canvas.height = App.levels[App.level].rows.length * (App.TILE_HEIGHT + 18);
             canvasBkgnd.width = canvas.width;
             canvasBkgnd.height = canvas.height;
-
-            document.body.appendChild(canvasBkgnd);
-            document.body.appendChild(canvas);
+            canvasInfo.width = canvas.width;
+            canvasInfo.height = 200;
 
             reset();
 
             lastTime = Date.now();
 
-            var width = GameItem.GameItem.TILE_WIDTH,
-                height = GameItem.GameItem.YPOS,
-                rowImages, row, col;
+            var width = App.TILE_WIDTH,
+                height = App.TILE_HEIGHT,
+                row, col;
 
             for (row = 0; row < App.levels[App.level].rows.length; row++) {
                 for (col = 0; col < App.levels[App.level].cols; col++) {
@@ -71,27 +79,51 @@ require(['./app', './resources', './gameitem'], function(App, Resources, GameIte
                 if(App.player.checkCollision(enemy)) collision = true;
                 // if(enemy.checkCollision  (App.allEnemies)) enemy.changeTrack();
             });
+
+            App.allRafts.forEach(function(raft) {
+                raft.update(dt);
+                if(App.player.checkCollision(raft)) {
+                    App.player.isRafting(raft);
+                }
+            });
+
             if(!collision) {
                 App.collectibles.forEach(function(collectible) {
-                    if(App.player.checkCollision(collectible)) {
-                        App.points += collectible.points;
-                        App.collectibles.splice(App.collectibles.indexOf(collectible), 1);
-                        console.log(App.points);
+                    if(collectible.remove) App.collectibles.splice(App.collectibles.indexOf(collectible), 1);
+                    if(App.player.checkCollision(collectible) && !collectible.collected) {
+                        collectible.collected = true;
+                        collectible.callback(App);
                     }
+                    collectible.update();
                 });
                 App.player.update();
             } else {
-                App.player.reset();
+                App.player.loseLife();
+                if(App.player.lives === 0) console.log('GAME OVER');
+                else App.player.reset();
             }
 
         }
 
         function render() {
 
+            renderInfo();
             renderEntities();
         }
 
+        function renderInfo() {
+            ctxInfo.clearRect(0, 0, canvasInfo.width, canvasInfo.height);
+            for(var i = 0; i < App.player.lives; i++) {
+                ctxInfo.drawImage(Resources.get('images/Heart.png'),
+                    i * 50, 0, App.TILE_WIDTH / 2, App.TILE_HEIGHT * 0.8);
+            }
+        }
+
         function renderEntities() {
+
+            App.allRafts.forEach(function(raft) {
+                raft.render();
+            });
 
             App.collectibles.forEach(function(collectible) {
                 collectible.render();
@@ -123,6 +155,7 @@ require(['./app', './resources', './gameitem'], function(App, Resources, GameIte
         'images/stone-block.png',
         'images/water-block.png',
         'images/grass-block.png',
+        'images/wood-block.png',
         'images/enemy-bug.png',
         'images/char-boy.png',
         'images/Gem Blue.png',

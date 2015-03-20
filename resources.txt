@@ -2,3 +2,9 @@ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Inheritance_and_the_prot
 
 https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
 
+http://requirejs.org/docs/api.html
+
+http://www.html5canvastutorials.com/advanced/html5-canvas-custom-transform/
+
+
+

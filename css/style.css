@@ -4,7 +4,10 @@ body {
 }
 canvas {
 	position: absolute;
-	top: 0;
+	top: 100;
 	left: 50%;
 	transform: translateX(-50%);
+}
+#info {
+	top: 0;
 }
