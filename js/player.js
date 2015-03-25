@@ -1,5 +1,7 @@
 define(['./utils', './resources', './gameitem'], function(Utils, Resources, GameItem) {
 
+'use strict';
+
     var Player = function() {
 
         GameItem.MoveableItem.call(this);
@@ -11,8 +13,9 @@ define(['./utils', './resources', './gameitem'], function(Utils, Resources, Game
         // the listener later
         this.keyEventHandler = this.keyHandler.bind(this);
 
-    }
+    };
 
+    Player.prototype = Object.create(GameItem.MoveableItem.prototype);
     Player.constructor = Player;
 
     Player.prototype.render = function() {
@@ -47,25 +50,22 @@ define(['./utils', './resources', './gameitem'], function(Utils, Resources, Game
 
     };
 
-    Player.prototype.checkCollision = function(object) {
-
-        var self =this,
-            dx = (self.x + self.radius) - (object.x + object.radius),
-            dy = (self.y + self.TILE_HEIGHT/2 + self.radius) - (object.y + object.radius),
-            distance = Math.sqrt(dx * dx + dy * dy);
-
-        return distance < self.radius + object.radius;
+    Player.prototype.getLocation = function() {
+        var row, col;
+        row = Math.round(this.y / this.TILE_HEIGHT);
+        col = Math.round(this.x / this.TILE_WIDTH);
+        return { row: row, col: col };
     };
 
-    Player.prototype.isRafting = function(raft) {
+    Player.prototype.startRafting = function(raft) {
         this.onRaft = true;
         this.raft = raft;
     };
 
-    Player.prototype.exitRaft = function() {
+    Player.prototype.stopRafting = function() {
         this.onRaft = false;
         this.x = Math.round(this.x / this.TILE_WIDTH) * this.TILE_WIDTH;
-    }
+    };
 
     Player.prototype.loseLife = function() {
         this.lives--;
@@ -82,7 +82,6 @@ define(['./utils', './resources', './gameitem'], function(Utils, Resources, Game
             case 'up':
                 if(this.y - this.TILE_HEIGHT < 0) this.reset();
                 else this.y -= this.TILE_HEIGHT;
-                if(this.onRaft) this.exitRaft();
             break;
             case 'right':
                 if(this.x + this.TILE_WIDTH > this.maxCols * (this.TILE_WIDTH - 1)) return;
@@ -91,11 +90,12 @@ define(['./utils', './resources', './gameitem'], function(Utils, Resources, Game
             case 'down':
                 if(this.y + this.TILE_HEIGHT > this.startY) return;
                 this.y += this.TILE_HEIGHT;
-                if(this.onRaft) this.exitRaft();
             break;
             default:
             break;
         }
+
+        if(this.onRaft) this.stopRafting();
 
         this.render();
     };

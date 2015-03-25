@@ -1,8 +1,10 @@
+'use strict';
+
 define(['./player', './enemy', './collectible', './raft'], function(Player, Enemy, CollectibleItem, Raft) {
 
     var level, levels, lives, points, rowImages, collectibles, allEnemies, player, stoneRows, allRafts;
 
-    level = 1;
+    level = 0;
     points = 0;
 
     rowImages = {
@@ -13,13 +15,13 @@ define(['./player', './enemy', './collectible', './raft'], function(Player, Enem
 
     levels = [
        { rows: ['water', 'stone', 'stone', 'stone', 'grass', 'grass'], cols: 5,
-            enemies: 3, directions: [1, -1, 1], collectibles: ['Gem'] },
+            enemies: 3, directions: [1, -1, 1], collectibles: [CollectibleItem.Gem] },
        { rows: ['water', 'stone', 'stone', 'water', 'stone', 'stone', 'grass'], cols: 5,
-            enemies: 4, directions: [-1, -1, 1, 1], collectibles: ['Key', 'Heart'] },
+            enemies: 4, directions: [-1, -1, 1, 1], collectibles: [CollectibleItem.Gem CollectibleItem.Gem] },
        { rows: ['water', 'stone', 'stone', 'water', 'stone', 'stone', 'grass'], cols: 5,
-            enemies: 5, directions: [1, -1, 1, -1], collectibles: ['Gem', 'Gem', 'Key'] },
+            enemies: 5, directions: [1, -1, 1, -1], collectibles: [CollectibleItem.Gem, CollectibleItem.Gem, CollectibleItem.Key] },
        { rows: ['water', 'stone', 'stone', 'water', 'stone', 'water', 'stone', 'grass'], cols: 5,
-            enemies: 6, directions: [-1, 1, 1, -1], collectibles: ['Gem', 'Heart', 'Star'] }
+            enemies: 6, directions: [-1, 1, 1, -1], collectibles: [CollectibleItem.Gem, CollectibleItem.Heart, CollectibleItem.Star] }
     ];
 
     collectibles = [];
@@ -47,13 +49,9 @@ define(['./player', './enemy', './collectible', './raft'], function(Player, Enem
 
     }
 
-    for(var i = 0; i < levels[level].collectibles.length; i++) {
-        var collectible = 'new CollectibleItem.'
-            + levels[level].collectibles[i]
-            + '(stoneRows'
-            + ',' + levels[level].cols + ')';
-
-        collectibles.push(eval(collectible));
+    for(var c = 0; c < levels[level].collectibles.length; c++) {
+        var collectible = new levels[level].collectibles[c](stoneRows, levels[level].cols);
+        collectibles.push(collectible);
     }
 
     for(var t = 0; t < levels[level].enemies; t++) {

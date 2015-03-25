@@ -6,6 +6,8 @@
  */
 define(function() {
 
+'use strict';
+
     var resourceCache = {};
     var loading = [];
     var readyCallbacks = [];

@@ -1,5 +1,7 @@
 define(['./gameitem', './resources'], function(GameItem, Resources) {
 
+'use strict';
+
 	var Raft = function(row) {
 
 		GameItem.MoveableItem.call(this);
@@ -18,14 +20,10 @@ define(['./gameitem', './resources'], function(GameItem, Resources) {
 	};
 
 	Raft.prototype.update = function(dt) {
+        if(this.x > this.TILE_WIDTH * (this.maxCols - 1)) this.direction = -1;
+        if(this.x < 0) this.direction = 1;
         this.x += this.speed * this.direction * dt;
-        if(this.isOutofbounds()) this.direction *= -1;
 	};
-
-	Raft.prototype.isOutofbounds = function() {
-		return this.x > this.TILE_WIDTH * (this.maxCols - 1) || this.x < 0;
-	};
-
 
 	return(Raft);
 

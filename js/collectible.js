@@ -1,5 +1,7 @@
 define(['./utils', './gameitem', './resources'], function(Utils, GameItem, Resources) {
 
+'use strict';
+
 	var CollectibleItem = function(rows, cols) {
 
 		GameItem.GameItem.call(this);
@@ -55,8 +57,8 @@ define(['./utils', './gameitem', './resources'], function(Utils, GameItem, Resou
 	    this.radius = 30;
 		this.callback = function(App) {
 			App.points += this.points;
-			console.log(app.points);
-		}
+			console.log(App.points);
+		};
 	};
 	Gem.constructor = Gem;
 
@@ -71,8 +73,8 @@ define(['./utils', './gameitem', './resources'], function(Utils, GameItem, Resou
 		this.callback = function(App) {
 			App.points += this.points;
 			console.log('Got Key!');
-		}
-	}
+		};
+	};
 	Key.constructor = Key;
 
 
@@ -85,9 +87,9 @@ define(['./utils', './gameitem', './resources'], function(Utils, GameItem, Resou
 	    this.radius = 30;
 		this.callback = function(App) {
 			App.player.lives++;
-		}
+		};
 
-	}
+	};
 	Heart.constructor = Heart;
 
 
@@ -98,7 +100,7 @@ define(['./utils', './gameitem', './resources'], function(Utils, GameItem, Resou
 		this.sprite = 'images/Star.png';
 		this.points = 200;
 	    this.radius = 30;
-	}
+	};
 	Star.constructor = Star;
 
 	return {
@@ -106,5 +108,5 @@ define(['./utils', './gameitem', './resources'], function(Utils, GameItem, Resou
 		Key: Key,
 		Heart: Heart,
 		Star: Star
-	}
+	};
 });
