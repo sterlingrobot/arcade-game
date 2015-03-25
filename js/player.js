@@ -50,13 +50,6 @@ define(['./utils', './resources', './gameitem'], function(Utils, Resources, Game
 
     };
 
-    Player.prototype.getLocation = function() {
-        var row, col;
-        row = Math.round(this.y / this.TILE_HEIGHT);
-        col = Math.round(this.x / this.TILE_WIDTH);
-        return { row: row, col: col };
-    };
-
     Player.prototype.startRafting = function(raft) {
         this.onRaft = true;
         this.raft = raft;
@@ -101,15 +94,7 @@ define(['./utils', './resources', './gameitem'], function(Utils, Resources, Game
     };
 
     Player.prototype.keyHandler = function(e) {
-
-        var allowedKeys = {
-            37: 'left',
-            38: 'up',
-            39: 'right',
-            40: 'down'
-        };
-
-       this.handleInput(allowedKeys[e.keyCode]);
+        this.handleInput(Utils.keyHandler(e.keyCode));
     };
 
     return(Player);

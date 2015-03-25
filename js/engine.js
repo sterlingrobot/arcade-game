@@ -40,7 +40,7 @@ require(['./app', './resources'], function(App, Resources) {
 
         function init() {
 
-            console.log('Engine init: ' + App.levels[App.level].cols + ' x ' + App.levels[App.level].rows.length);
+            console.log('Game init: ' + App.levels[App.level].cols + ' x ' + App.levels[App.level].rows.length);
 
             canvas.width = App.levels[App.level].cols * App.TILE_WIDTH;
             canvas.height = App.levels[App.level].rows.length * (App.TILE_HEIGHT + 18);
@@ -79,6 +79,10 @@ require(['./app', './resources'], function(App, Resources) {
 
             var collision = false,
                 drown = false;
+
+            App.entities.forEach(function(entity) {
+                if(entity.remove) App.entities.splice(App.entities.indexOf(entity), 1);
+            });
 
             App.allEnemies.forEach(function(enemy) {
 
@@ -126,6 +130,7 @@ require(['./app', './resources'], function(App, Resources) {
                 }
                 collectible.update();
             });
+
             App.player.update();
 
         }
@@ -137,11 +142,12 @@ require(['./app', './resources'], function(App, Resources) {
         }
 
         function renderInfo() {
+
             var text = App.points.toString();
 
             ctxInfo.clearRect(0, 0, canvasInfo.width, canvasInfo.height);
 
-            ctxInfo.fillText("Hello", 300, 0);
+            ctxInfo.fillText(text, 300, 0);
 
             for(var i = 0; i < App.player.lives; i++) {
                 ctxInfo.drawImage(Resources.get('images/Heart.png'),
@@ -164,12 +170,19 @@ require(['./app', './resources'], function(App, Resources) {
                 enemy.render();
             });
 
+            App.entities.forEach(function(entity) {
+                entity.render();
+            });
+
             App.player.render();
 
         }
 
         function reset() {
+
+            App.init();
             window.scrollTo(0, canvas.height);
+
         }
 
         return {
@@ -189,12 +202,17 @@ require(['./app', './resources'], function(App, Resources) {
         'images/wood-block.png',
         'images/enemy-bug.png',
         'images/char-boy.png',
+        'images/char-cat-girl.png',
+        'images/char-horn-girl.png',
+        'images/char-pink-girl.png',
+        'images/char-princess-girl.png',
         'images/Gem Blue.png',
         'images/Gem Green.png',
         'images/Gem Orange.png',
         'images/Key.png',
         'images/Heart.png',
         'images/Star.png',
+        'images/Selector.png'
     ]);
 
     window.ctx = Engine.ctx;

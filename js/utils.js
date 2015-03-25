@@ -11,5 +11,17 @@ define({
 	},
 	getRandomIndex: function(arr) {
 		return arr[Math.floor(Math.random() * arr.length)];
-	}
+	},
+	keyHandler: function(keyCode) {
+
+        var allowedKeys = {
+            37: 'left',
+            38: 'up',
+            39: 'right',
+            40: 'down',
+            13: 'enter'
+        };
+
+       return(allowedKeys[keyCode]);
+    }
 });
