@@ -20,8 +20,7 @@ define(['./utils', './resources', './gameitem'], function(Utils, Resources, Game
 
     Player.prototype.render = function() {
 
-        var char = this.sprite || 'images/char-boy.png';
-        ctx.drawImage(Resources.get(char), this.x, this.y);
+        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 
     };
 
@@ -73,7 +72,7 @@ define(['./utils', './resources', './gameitem'], function(Utils, Resources, Game
                 this.x -= this.TILE_WIDTH;
             break;
             case 'up':
-                if(this.y - this.TILE_HEIGHT < 0) this.reset();
+                if(this.y < 0) this.reset();
                 else this.y -= this.TILE_HEIGHT;
             break;
             case 'right':

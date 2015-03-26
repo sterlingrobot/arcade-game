@@ -3,8 +3,9 @@
 define(['./utils', './resources', './gameitem', './player', './enemy', './collectible', './raft'],
     function(Utils, Resources, GameItem, Player, Enemy, CollectibleItem, Raft) {
 
-        var level, points, rowImages, characters, levels, init, levelUp, collectibles,
-            allEnemies, player, entities, selector, stoneRows, allRafts;
+        var level, points, rowImages, characters, levels,
+            init, levelUp, getLevel, completedLevel,
+            player, allEnemies, collectibles, allRafts, entities, selector, stoneRows;
 
         // Initialize our player
         player = new Player();
@@ -29,15 +30,17 @@ define(['./utils', './resources', './gameitem', './player', './enemy', './collec
         levels = [
             // First level is the game orientation and player selection
            { rows: ['water', 'stone', 'stone', 'stone', 'grass', 'grass'], cols: 5,
-                enemies: 0, directions: [], collectibles: [] },
+                enemies: 0, directions: [], collectibles: [], goal: selectedPlayer },
            { rows: ['water', 'stone', 'stone', 'stone', 'grass', 'grass'], cols: 5,
-                enemies: 3, directions: [1, -1, 1], collectibles: [CollectibleItem.Gem] },
+                enemies: 3, directions: [1, -1, 1], collectibles: [CollectibleItem.Gem],
+                    goal: reachedWater },
            { rows: ['water', 'stone', 'stone', 'water', 'stone', 'stone', 'grass'], cols: 5,
-                enemies: 4, directions: [-1, -1, 1, 1], collectibles: [CollectibleItem.Gem, CollectibleItem.Gem] },
+                enemies: 4, directions: [-1, -1, 1, 1], collectibles: [CollectibleItem.Gem, CollectibleItem.Gem],
+                    goal: reachedWater },
            { rows: ['water', 'stone', 'stone', 'water', 'stone', 'stone', 'grass'], cols: 5,
-                enemies: 5, directions: [1, -1, 1, -1], collectibles: [CollectibleItem.Gem, CollectibleItem.Gem, CollectibleItem.Key] },
+                enemies: 5, directions: [1, -1, 1, -1], collectibles: [CollectibleItem.Gem, CollectibleItem.Gem, CollectibleItem.Key], goal: reachedWater  },
            { rows: ['water', 'stone', 'stone', 'water', 'stone', 'water', 'stone', 'grass'], cols: 5,
-                enemies: 6, directions: [-1, 1, 1, -1], collectibles: [CollectibleItem.Gem, CollectibleItem.Heart, CollectibleItem.Star] }
+                enemies: 6, directions: [-1, 1, 1, -1], collectibles: [CollectibleItem.Gem, CollectibleItem.Heart, CollectibleItem.Star], goal: reachedWater }
         ];
 
         collectibles = [];
@@ -47,6 +50,8 @@ define(['./utils', './resources', './gameitem', './player', './enemy', './collec
         stoneRows = [];
 
         init = function() {
+
+            console.log('App init: ' + levels[level].cols + ' x ' + levels[level].rows.length);
 
             /* Create an array of rows that will have enemies, collectibles corresponding to
              *  row numbers, and assign directions (whether the enemies move left -1 or right 1)
@@ -82,11 +87,11 @@ define(['./utils', './resources', './gameitem', './player', './enemy', './collec
             if(level === 0) {
 
                 // Create the Start screen for character selection
-                for(var p = 0; c < characters.length; c++) {
+                for(var p = 0; p < characters.length; p++) {
 
                     var character = new GameItem.GameItem();
                     character.sprite = characters[p];
-                    character.x = c * character.TILE_WIDTH;
+                    character.x = p * character.TILE_WIDTH;
                     character.y = (levels[level].rows.length - 1) * character.TILE_HEIGHT - character.TILE_HEIGHT/2;
 
                     entities.push(character);
@@ -109,7 +114,6 @@ define(['./utils', './resources', './gameitem', './player', './enemy', './collec
                             entities.forEach(function(entity) {
                                 if(entity !== self && self.checkCollision(entity)) {
                                     player.sprite = entity.sprite;
-                                    levelUp();
                                 }
                             });
                         break;
@@ -141,32 +145,54 @@ define(['./utils', './resources', './gameitem', './player', './enemy', './collec
                 player.reset();
             }
 
+            return(this);
         };
 
         levelUp = function() {
 
-            level++;
+            if(level < levels.length - 1) {
 
-            if(selector) document.removeEventListener('keyup', selector.keyHandler, false);
+                level++;
 
-            // reset all entity groups by setting remove flag
-            [collectibles, allRafts, allEnemies, entities].forEach(function(group) {
-                group.forEach(function(item) {
-                    item.remove = true;
+                console.log('Level: ' + level);
+
+                if(selector) document.removeEventListener('keyup', selector.keyHandler, false);
+
+                // reset all entity groups by setting remove flag
+                [collectibles, allRafts, allEnemies, entities].forEach(function(group) {
+                    group.forEach(function(item) {
+                        item.remove = true;
+                    });
+                    group = [];
                 });
-                group = [];
-            });
-            stoneRows = [];
+                stoneRows = [];
 
-            init();
+            }
 
+            return level;
+
+        };
+
+        getLevel = function() {
+            return level;
+        };
+
+        completedLevel = function() {
+            return levels[level].goal();
+        };
+
+        function selectedPlayer() {
+            return !(player.sprite === '');
+        };
+
+        function reachedWater() {
+            return (player.getLocation().row === 0);
         };
 
         // Expose entities and level variables for use by the game engine
         return {
             TILE_HEIGHT: 83,
             TILE_WIDTH: 101,
-            level: level,
             levels: levels,
             points: points,
             rowImages: rowImages,
@@ -176,7 +202,9 @@ define(['./utils', './resources', './gameitem', './player', './enemy', './collec
             player: player,
             entities: entities,
             init: init,
-            levelUp: levelUp
+            levelUp: levelUp,
+            getLevel: getLevel,
+            completedLevel: completedLevel
         };
 
 });
