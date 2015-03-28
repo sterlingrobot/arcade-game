@@ -1,5 +1,5 @@
 requirejs.config({
-    baseUrl: '/nanodegree/arcade-game/js'
+    baseUrl: '/arcade-game/js'
 });
 
 require(['./app', './resources'], function(App, Resources) {
