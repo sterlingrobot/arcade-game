@@ -27,6 +27,15 @@ define(['./utils', './resources', './gameitem', './player', './enemy', './collec
             'images/char-princess-girl.png'
         ];
 
+        /*
+         *  Define goals for levels.  Engine will check against each levels goal function
+            to determine if the App should levelUp
+        */
+
+        function selectedPlayer() { return (player.sprite !== ''); }
+
+        function reachedWater() { return (player.getLocation().row === 0); }
+
         levels = [
             // First level is the game orientation and player selection
            { rows: ['water', 'stone', 'stone', 'stone', 'grass', 'grass'], cols: 5,
@@ -179,14 +188,6 @@ define(['./utils', './resources', './gameitem', './player', './enemy', './collec
 
         completedLevel = function() {
             return levels[level].goal();
-        };
-
-        function selectedPlayer() {
-            return !(player.sprite === '');
-        };
-
-        function reachedWater() {
-            return (player.getLocation().row === 0);
         };
 
         // Expose entities and level variables for use by the game engine
