@@ -1,14 +1,16 @@
 'use strict';
 
-define(['./utils', './resources', './gameitem', './player', './enemy', './collectible', './raft'],
-    function(Utils, Resources, GameItem, Player, Enemy, CollectibleItem, Raft) {
+define(['./utils', './resources', './gameitem', './announce', './player', './enemy', './collectible', './raft'],
+    function(Utils, Resources, GameItem, Announce, Player, Enemy, CollectibleItem, Raft) {
 
         var level, points, rowImages, characters, levels,
             init, levelUp, getLevel, completedLevel,
-            player, allEnemies, collectibles, allRafts, entities, selector, stoneRows;
+            player, allEnemies, collectibles, allRafts,
+            entities, announce, selector, stoneRows;
 
-        // Initialize our player
+       // Initialize our persistent entities
         player = new Player();
+        announce = new Announce();
 
         level = 0;
         points = 0;
@@ -36,20 +38,63 @@ define(['./utils', './resources', './gameitem', './player', './enemy', './collec
 
         function reachedWater() { return (player.getLocation().row === 0); }
 
+        function wonGame() { return false; }
+
         levels = [
-            // First level is the game orientation and player selection
-           { rows: ['water', 'stone', 'stone', 'stone', 'grass', 'grass'], cols: 5,
-                enemies: 0, directions: [], collectibles: [], goal: selectedPlayer },
-           { rows: ['water', 'stone', 'stone', 'stone', 'grass', 'grass'], cols: 5,
-                enemies: 3, directions: [1, -1, 1], collectibles: [CollectibleItem.Gem],
-                    goal: reachedWater },
-           { rows: ['water', 'stone', 'stone', 'water', 'stone', 'stone', 'grass'], cols: 5,
-                enemies: 4, directions: [-1, -1, 1, 1], collectibles: [CollectibleItem.Gem, CollectibleItem.Gem],
-                    goal: reachedWater },
-           { rows: ['water', 'stone', 'stone', 'water', 'stone', 'stone', 'grass'], cols: 5,
-                enemies: 5, directions: [1, -1, 1, -1], collectibles: [CollectibleItem.Gem, CollectibleItem.Gem, CollectibleItem.Key], goal: reachedWater  },
-           { rows: ['water', 'stone', 'stone', 'water', 'stone', 'water', 'stone', 'grass'], cols: 5,
-                enemies: 6, directions: [-1, 1, 1, -1], collectibles: [CollectibleItem.Gem, CollectibleItem.Heart, CollectibleItem.Star], goal: reachedWater }
+            { // First level is the game orientation and player selection
+                announcement: 'Choose your Player!',
+                rows: ['water', 'stone', 'stone', 'stone', 'grass', 'grass'],
+                cols: 5,
+                enemies: 0,
+                directions: [],
+                collectibles: [],
+                goal: selectedPlayer
+            },
+            {
+                announcement: 'Get to the Water!',
+                rows: ['water', 'stone', 'stone', 'stone', 'grass', 'grass'],
+                cols: 5,
+                enemies: 3,
+                directions: [1, -1, 1],
+                collectibles: [CollectibleItem.Gem],
+                goal: reachedWater
+            },
+            {
+                announcement: 'Collect the Key!',
+                rows: ['water', 'stone', 'stone', 'water', 'stone', 'stone', 'grass'],
+                cols: 5,
+                enemies: 4,
+                directions: [-1, -1, 1, 1],
+                collectibles: [CollectibleItem.Gem, CollectibleItem.Key],
+                goal: reachedWater
+            },
+            {
+                announcement: 'Collect the Key!',
+                rows: ['water', 'stone', 'stone', 'water', 'stone', 'stone', 'grass'],
+                cols: 5,
+                enemies: 5,
+                directions: [1, -1, 1, -1],
+                collectibles: [CollectibleItem.Gem, CollectibleItem.Gem, CollectibleItem.Key],
+                goal: reachedWater
+            },
+            {
+                announcement: 'Collect the Star!',
+                rows: ['water', 'stone', 'stone', 'water', 'stone', 'water', 'stone', 'grass'],
+                cols: 5,
+                enemies: 6,
+                directions: [-1, 1, 1, -1],
+                collectibles: [CollectibleItem.Gem, CollectibleItem.Heart, CollectibleItem.Star],
+                goal: reachedWater
+            },
+            {
+                announcement: 'You Won the Game!',
+                rows: ['grass', 'grass', 'grass', 'grass', 'grass', 'grass'],
+                cols: 5,
+                enemies: 0,
+                directions: [],
+                collectibles: [],
+                goal: wonGame
+            }
         ];
 
         collectibles = [];
@@ -61,6 +106,9 @@ define(['./utils', './resources', './gameitem', './player', './enemy', './collec
         init = function() {
 
             console.log('App init: ' + levels[level].cols + ' x ' + levels[level].rows.length);
+
+            announce.reset();
+            announce.text = levels[level].announcement;
 
             /* Create an array of rows that will have enemies, collectibles corresponding to
              *  row numbers, and assign directions (whether the enemies move left -1 or right 1)
@@ -192,16 +240,23 @@ define(['./utils', './resources', './gameitem', './player', './enemy', './collec
 
         // Expose entities and level variables for use by the game engine
         return {
+
+            // config proerties
             TILE_HEIGHT: 83,
             TILE_WIDTH: 101,
             levels: levels,
             points: points,
             rowImages: rowImages,
+
+            // level entities
+            announce: announce,
             collectibles: collectibles,
             allEnemies: allEnemies,
             allRafts: allRafts,
             player: player,
             entities: entities,
+
+            // app methods
             init: init,
             levelUp: levelUp,
             getLevel: getLevel,

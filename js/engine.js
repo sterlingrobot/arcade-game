@@ -1,5 +1,5 @@
 requirejs.config({
-    baseUrl: '/arcade-game/js'
+    baseUrl: '/nanodegree/arcade-game/js'
 });
 
 require(['./app', './resources'], function(App, Resources) {
@@ -20,10 +20,10 @@ require(['./app', './resources'], function(App, Resources) {
             lives = doc.getElementById('lives'),
             info, lastTime;
 
-        info = doc.body.appendChild(canvasInfo);
-        info.className = 'info';
         doc.body.appendChild(canvasBkgnd);
         doc.body.appendChild(canvas);
+        info = doc.body.appendChild(canvasInfo);
+        info.className = 'info';
 
         function main() {
 
@@ -49,13 +49,16 @@ require(['./app', './resources'], function(App, Resources) {
             App.init();
 
             canvas.width = App.levels[App.getLevel()].cols * App.TILE_WIDTH;
-            canvas.height = App.levels[App.getLevel()].rows.length * (App.TILE_HEIGHT + 18);
+            canvas.height = (App.levels[App.getLevel()].rows.length + 1) * (App.TILE_HEIGHT) + 5;
             canvasBkgnd.width = canvas.width;
             canvasBkgnd.height = canvas.height;
             canvasInfo.width = canvas.width;
-            canvasInfo.height = 55;
-            ctxInfo.font = '48px sans-serif';
-            ctxInfo.fillStyle = '#000';
+            canvasInfo.height = canvas.height;
+            ctxInfo.font = '48px Impact, Charcoal, sans-serif';
+            ctxInfo.fillStyle = '#fff';
+            ctxInfo.lineWidth = 2;
+            ctxInfo.strokeStyle = '#000';
+            ctxInfo.textAlign = 'end';
 
             // ctxBkgnd.clearRect(0, 0, canvasBkgnd.width, canvasBkgnd.height);
 
@@ -84,6 +87,7 @@ require(['./app', './resources'], function(App, Resources) {
             var collision = false,
                 drown = false;
 
+            App.announce.update(dt);
             App.player.update();
             if(App.completedLevel()) {
                 App.levelUp();
@@ -167,12 +171,15 @@ require(['./app', './resources'], function(App, Resources) {
 
             ctxInfo.clearRect(0, 0, canvasInfo.width, canvasInfo.height);
 
-            ctxInfo.fillText(text, 300, 0);
+            ctxInfo.fillText(text, 500, 45);
+            ctxInfo.strokeText(text, 500, 45);
 
             for(var i = 0; i < App.player.lives; i++) {
                 ctxInfo.drawImage(Resources.get('images/Heart.png'),
-                    i * 50, 0, App.TILE_WIDTH / 2, App.TILE_HEIGHT * 0.8);
+                    i * 50, -10, App.TILE_WIDTH / 2, App.TILE_HEIGHT * 0.8);
             }
+
+            App.announce.render();
 
         }
 
@@ -207,10 +214,15 @@ require(['./app', './resources'], function(App, Resources) {
         return {
             init: init,
             ctx: ctx,
-            ctxBkgnd: ctxBkgnd
+            ctxBkgnd: ctxBkgnd,
+            ctxInfo: ctxInfo
         };
 
     })();
+
+    window.ctx = Engine.ctx;
+    window.ctxBkgnd = Engine.ctxBkgnd;
+    window.ctxInfo = Engine.ctxInfo;
 
     Resources.onReady(Engine.init);
 
@@ -233,8 +245,5 @@ require(['./app', './resources'], function(App, Resources) {
         'images/Star.png',
         'images/Selector.png'
     ]);
-
-    window.ctx = Engine.ctx;
-    window.ctxBkgnd = Engine.ctxBkgnd;
 
 });

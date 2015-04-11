@@ -7,8 +7,8 @@ define(['./gameitem', './resources'], function(GameItem, Resources) {
 		GameItem.MoveableItem.call(this);
 		this.sprite = 'images/wood-block.png';
 		this.row = row;
-		this.speed = 50;
-		this.radius = 30;
+		this.speed = 50 + (Math.random() * 30);
+		this.radius = 25;
 		this.x = 0;
 		this.y = this.row * this.TILE_HEIGHT - 18;
 		this.direction = 1;
