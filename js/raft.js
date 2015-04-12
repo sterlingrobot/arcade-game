@@ -13,11 +13,8 @@ define(['./gameitem', './resources'], function(GameItem, Resources) {
 		this.y = this.row * this.TILE_HEIGHT - 18;
 		this.direction = 1;
 	};
+	Raft.prototype = Object.create(GameItem.MoveableItem.prototype);
 	Raft.constructor = Raft;
-
-	Raft.prototype.render = function() {
-		ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-	};
 
 	Raft.prototype.update = function(dt) {
         if(this.x > this.TILE_WIDTH * (this.maxCols - 1)) this.direction = -1;

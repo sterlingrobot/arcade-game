@@ -19,7 +19,8 @@ define({
             38: 'up',
             39: 'right',
             40: 'down',
-            13: 'enter'
+            13: 'enter',
+            32: 'space'
         };
 
        return(allowedKeys[keyCode]);

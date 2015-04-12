@@ -15,27 +15,29 @@ define(['./utils', './gameitem', './resources'], function(Utils, GameItem, Resou
 		this.collected = false;
 		this.remove = false;
 
-		this.update = function() {
-			// if the item has been collected (player collision),
-			// fade up and out during the update cycle
-			if(this.collected) {
-				this.y -= 5;
-				this.opacity -= 0.1;
-				// once the item has faded out flag it for removal by the engine
-				if(this.opacity < 0.1) this.remove = true;
-			}
-		};
-
-		this.render = function() {
-			ctx.save();
-			ctx.globalAlpha = this.opacity;
-			ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-			ctx.restore();
-		};
-
-		this.callback = function() { /*noop*/ };
-
 	};
+	CollectibleItem.prototype = Object.create(GameItem.GameItem.prototype);
+	CollectibleItem.constructor = CollectibleItem;
+
+	CollectibleItem.prototype.update = function() {
+		// if the item has been collected (player collision),
+		// fade up and out during the update cycle
+		if(this.collected) {
+			this.y -= 5;
+			this.opacity -= 0.1;
+			// once the item has faded out flag it for removal by the engine
+			if(this.opacity < 0.1) this.remove = true;
+		}
+	};
+
+	CollectibleItem.prototype.render = function() {
+		ctx.save();
+		ctx.globalAlpha = this.opacity;
+		ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+		ctx.restore();
+	};
+
+	CollectibleItem.prototype.callback = function() { /*noop*/ };
 
 	var Gem = function(rows, cols) {
 
@@ -55,12 +57,12 @@ define(['./utils', './gameitem', './resources'], function(Utils, GameItem, Resou
 		this.sprite = sprites[level];
 		this.points = pointValues[level];
 	    this.radius = 30;
-		this.callback = function(App) {
-			App.points += this.points;
-			console.log(App.points);
-		};
 	};
+    Gem.prototype = Object.create(CollectibleItem.prototype);
 	Gem.constructor = Gem;
+	Gem.prototype.callback = function(App) {
+		App.points += this.points;
+	};
 
 
 	var Key = function(rows, cols) {
@@ -70,12 +72,16 @@ define(['./utils', './gameitem', './resources'], function(Utils, GameItem, Resou
 		this.sprite = 'images/Key.png';
 		this.points = 200;
 	    this.radius = 30;
-		this.callback = function(App) {
-			App.points += this.points;
-			console.log('Got Key!');
-		};
+	    // always put the key on the top row
+	    this.row = rows[0];
+		this.y =  this.row.row * this.TILE_HEIGHT - this.TILE_HEIGHT * 0.4;
 	};
+    Key.prototype = Object.create(CollectibleItem.prototype);
 	Key.constructor = Key;
+	Key.prototype.callback = function(App) {
+		App.points += this.points;
+		console.log('Got Key!');
+	};
 
 
 	var Heart = function(rows, cols) {
@@ -85,12 +91,13 @@ define(['./utils', './gameitem', './resources'], function(Utils, GameItem, Resou
 		this.sprite = 'images/Heart.png';
 		this.points = 200;
 	    this.radius = 30;
-		this.callback = function(App) {
-			App.player.lives++;
-		};
 
 	};
+    Heart.prototype = Object.create(CollectibleItem.prototype);
 	Heart.constructor = Heart;
+	Heart.prototype.callback = function(App) {
+		App.player.lives++;
+	};
 
 
 	var Star = function(rows, cols) {
@@ -101,7 +108,11 @@ define(['./utils', './gameitem', './resources'], function(Utils, GameItem, Resou
 		this.points = 200;
 	    this.radius = 30;
 	};
+    Star.prototype = Object.create(CollectibleItem.prototype);
 	Star.constructor = Star;
+	Star.prototype.callback = function(App) {
+		App.points += this.points;
+	};
 
 	return {
 		Gem: Gem,

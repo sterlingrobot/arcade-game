@@ -8,6 +8,7 @@ define(['./utils', './resources', './gameitem'], function(Utils, Resources, Game
         this.lives = 3;
         this.radius = 25;
         this.onRaft = false;
+        this.collectibles = [];
 
         // We need to hold a pointer to this function in order to remove
         // the listener later
@@ -19,9 +20,7 @@ define(['./utils', './resources', './gameitem'], function(Utils, Resources, Game
     Player.constructor = Player;
 
     Player.prototype.render = function() {
-
-        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-
+        if(this.sprite) ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     };
 
     Player.prototype.selectCharacter = function(char) {

@@ -2,7 +2,7 @@ requirejs.config({
     baseUrl: '/nanodegree/arcade-game/js'
 });
 
-require(['./app', './resources'], function(App, Resources) {
+require(['./app', './utils', './resources'], function(App, Utils, Resources) {
 
 'use strict';
 
@@ -16,22 +16,22 @@ require(['./app', './resources'], function(App, Resources) {
             ctxBkgnd = canvasBkgnd.getContext('2d'),
             canvasInfo = doc.createElement('canvas'),
             ctxInfo = canvasInfo.getContext('2d'),
-            score = doc.getElementById('score'),
-            lives = doc.getElementById('lives'),
-            info, lastTime;
+            paused = false,
+            lastTime;
 
         doc.body.appendChild(canvasBkgnd);
         doc.body.appendChild(canvas);
-        info = doc.body.appendChild(canvasInfo);
-        info.className = 'info';
+        doc.body.appendChild(canvasInfo);
 
         function main() {
 
             var now = Date.now(),
-                dt = (now - lastTime) / 1000.0;
+                dt = paused ? 1 : (now - lastTime) / 1000.0;
 
-            update(dt);
-            render();
+            if(!paused) {
+                update(dt);
+                render();
+            }
 
             lastTime = now;
 
@@ -40,29 +40,31 @@ require(['./app', './resources'], function(App, Resources) {
 
         function init() {
 
-            console.log('Game init: Level ' + App.getLevel() + ':' + App.levels[App.getLevel()].cols + ' x ' + App.levels[App.getLevel()].rows.length);
-
-            var width = App.TILE_WIDTH,
-                height = App.TILE_HEIGHT,
-                row, col;
-
-            App.init();
+            console.log('Game init: ' + App.levels[App.getLevel()].cols + ' x ' + App.levels[App.getLevel()].rows.length);
 
             canvas.width = App.levels[App.getLevel()].cols * App.TILE_WIDTH;
             canvas.height = (App.levels[App.getLevel()].rows.length + 1) * (App.TILE_HEIGHT) + 5;
+
             canvasBkgnd.width = canvas.width;
             canvasBkgnd.height = canvas.height;
-            canvasInfo.width = canvas.width;
-            canvasInfo.height = canvas.height;
-            ctxInfo.font = '48px Impact, Charcoal, sans-serif';
-            ctxInfo.fillStyle = '#fff';
-            ctxInfo.lineWidth = 2;
-            ctxInfo.strokeStyle = '#000';
-            ctxInfo.textAlign = 'end';
 
-            // ctxBkgnd.clearRect(0, 0, canvasBkgnd.width, canvasBkgnd.height);
+            canvasInfo.width = canvas.width +  App.TILE_WIDTH * 2;
+            canvasInfo.height = canvas.height;
+
+            ctxInfo.font = '48px Impact, Charcoal, sans-serif';
+            ctxInfo.lineWidth = 2;
+            ctxInfo.fillStyle = '#fff';
+            ctxInfo.strokeStyle = '#000';
 
             reset();
+
+        }
+
+        function reset() {
+
+            var width = App.TILE_WIDTH,
+                height = App.TILE_HEIGHT,
+                row, col, txtX;
 
             lastTime = Date.now();
 
@@ -73,8 +75,49 @@ require(['./app', './resources'], function(App, Resources) {
                 }
             }
 
-            main();
+            if(App.getLevel() === 0) {
 
+                txtX = canvasInfo.width / 2;
+                paused = true;
+                document.addEventListener('keyup', keyHandler, false);
+
+                ctxInfo.textAlign = 'center';
+
+                ctxInfo.fillText('Ready to Play?', txtX, 280);
+                ctxInfo.strokeText('Ready to Play?', txtX, 280);
+
+                ctxInfo.font = '36px Impact, Charcoal, sans-serif';
+
+                ctxInfo.drawImage(Resources.get('images/start-key.png'), 210, 380);
+                ctxInfo.fillText('Press Spacebar to Start!', txtX, 480);
+                ctxInfo.strokeText('Press Spacebar to Start!', txtX, 480);
+
+            } else {
+                App.init();
+            }
+
+            window.scrollTo(0, canvas.height);
+
+        }
+
+        function keyHandler(e) {
+
+            handleInput(Utils.keyHandler(e.keyCode));
+        }
+
+        function handleInput(key) {
+
+            if(key === 'space') {
+
+                document.removeEventListener('keyup', keyHandler, false);
+
+                paused = false;
+
+                App.reset();
+                App.init();
+
+                main();
+            }
         }
 
         function update(dt) {
@@ -87,8 +130,13 @@ require(['./app', './resources'], function(App, Resources) {
             var collision = false,
                 drown = false;
 
-            App.announce.update(dt);
-            App.player.update();
+            App.announcements.forEach(function(announce) {
+                if(announce.remove) App.announcements.splice(App.announcements.indexOf(announce), 1);
+                announce.update();
+            });
+
+            App.player.update(dt);
+
             if(App.completedLevel()) {
                 App.levelUp();
                 init();
@@ -136,9 +184,22 @@ require(['./app', './resources'], function(App, Resources) {
             drown = App.levels[App.getLevel()].rows[App.player.getLocation().row] === 'water' && !App.player.onRaft;
 
             if(collision || drown) {
+
                 App.player.loseLife();
-                if(App.player.lives === 0) console.log('GAME OVER');
-                else App.player.reset();
+
+                if(App.player.lives === 0) {
+
+                    App.gameOver();
+                    paused = true;
+                    document.removeEventListener('keyup', App.player.keyEventHandler, false);
+                    document.addEventListener('keyup', keyHandler, false);
+
+                } else {
+
+                    App.tryAgain();
+                    App.player.reset();
+
+                }
 
                 return;
             }
@@ -150,13 +211,12 @@ require(['./app', './resources'], function(App, Resources) {
                 collectible.update();
 
                 if(App.player.checkCollision(collectible) && !collectible.collected) {
+                    App.player.collectibles.push(collectible);
                     collectible.collected = true;
                     collectible.callback(App);
                 }
 
             });
-
-
         }
 
         function render() {
@@ -167,27 +227,39 @@ require(['./app', './resources'], function(App, Resources) {
 
         function renderInfo() {
 
-            var text = App.points.toString();
+            var x = (App.levels[App.getLevel()].cols + 1) * App.TILE_WIDTH,
+                livesTxt = 'Lives:',
+                pointsTxt = App.points,
+                collectibleY = 50;
 
             ctxInfo.clearRect(0, 0, canvasInfo.width, canvasInfo.height);
 
-            ctxInfo.fillText(text, 500, 45);
-            ctxInfo.strokeText(text, 500, 45);
+            ctxInfo.textAlign = 'end';
+            ctxInfo.fillText(pointsTxt, x, 45);
+            ctxInfo.strokeText(pointsTxt, x, 45);
+
+            ctxInfo.textAlign = 'start';
+            ctxInfo.fillText(livesTxt, App.TILE_WIDTH, 45);
+            ctxInfo.strokeText(livesTxt, App.TILE_WIDTH, 45);
 
             for(var i = 0; i < App.player.lives; i++) {
                 ctxInfo.drawImage(Resources.get('images/Heart.png'),
-                    i * 50, -10, App.TILE_WIDTH / 2, App.TILE_HEIGHT * 0.8);
+                    ctxInfo.measureText(livesTxt).width + 20 + App.TILE_WIDTH + i * 50, -10, App.TILE_WIDTH / 2, App.TILE_HEIGHT * 0.8);
             }
 
-            App.announce.render();
+            App.player.collectibles.forEach(function(collectible) {
+                ctxInfo.drawImage(Resources.get(collectible.sprite),
+                    40, collectibleY, collectible.TILE_WIDTH / 2, (collectible.TILE_HEIGHT) * 0.8);
+                collectibleY += collectible.TILE_HEIGHT * 0.5;
+            });
 
+            App.announcements.forEach(function(announce) {
+                announce.render();
+            });
         }
 
         function renderEntities() {
 
-            App.allRafts.forEach(function(raft) {
-                raft.render();
-            });
 
             App.collectibles.forEach(function(collectible) {
                 collectible.render();
@@ -201,14 +273,11 @@ require(['./app', './resources'], function(App, Resources) {
                 entity.render();
             });
 
+            App.allRafts.forEach(function(raft) {
+                raft.render();
+            });
+
             App.player.render();
-
-        }
-
-        function reset() {
-
-            window.scrollTo(0, canvas.height);
-
         }
 
         return {
@@ -227,6 +296,9 @@ require(['./app', './resources'], function(App, Resources) {
     Resources.onReady(Engine.init);
 
     Resources.load([
+        'images/start-key.png',
+        'images/player-keys.png',
+        'images/selector-keys.png',
         'images/stone-block.png',
         'images/water-block.png',
         'images/grass-block.png',

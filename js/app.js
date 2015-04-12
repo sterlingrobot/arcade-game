@@ -3,14 +3,23 @@
 define(['./utils', './resources', './gameitem', './announce', './player', './enemy', './collectible', './raft'],
     function(Utils, Resources, GameItem, Announce, Player, Enemy, CollectibleItem, Raft) {
 
-        var level, points, rowImages, characters, levels,
-            init, levelUp, getLevel, completedLevel,
+        var level, points, rowImages, characters, levels, TILE_WIDTH, TILE_HEIGHT,
+            reset, init, levelUp, getLevel, completedLevel, tryAgain, gameOver,
             player, allEnemies, collectibles, allRafts,
-            entities, announce, selector, stoneRows;
+            entities, announcements, selector, stoneRows;
+
+        announcements = [];
+        collectibles = [];
+        allRafts = [];
+        allEnemies = [];
+        entities = [];
+        stoneRows = [];
+
 
        // Initialize our persistent entities
         player = new Player();
-        announce = new Announce();
+        TILE_WIDTH = player.TILE_WIDTH;
+        TILE_HEIGHT = player.TILE_HEIGHT;
 
         level = 0;
         points = 0;
@@ -29,19 +38,8 @@ define(['./utils', './resources', './gameitem', './announce', './player', './ene
             'images/char-princess-girl.png'
         ];
 
-        /*
-         *  Define goals for levels.  Engine will check against each levels goal function
-            to determine if the App should levelUp
-        */
-
-        function selectedPlayer() { return (player.sprite !== ''); }
-
-        function reachedWater() { return (player.getLocation().row === 0); }
-
-        function wonGame() { return false; }
-
         levels = [
-            { // First level is the game orientation and player selection
+            { // First level is player selection
                 announcement: 'Choose your Player!',
                 rows: ['water', 'stone', 'stone', 'stone', 'grass', 'grass'],
                 cols: 5,
@@ -60,31 +58,31 @@ define(['./utils', './resources', './gameitem', './announce', './player', './ene
                 goal: reachedWater
             },
             {
-                announcement: 'Collect the Key!',
-                rows: ['water', 'stone', 'stone', 'water', 'stone', 'stone', 'grass'],
+                announcement: 'Collect all the Gems!',
+                rows: ['stone', 'stone', 'stone', 'water', 'stone', 'stone', 'grass'],
                 cols: 5,
                 enemies: 4,
                 directions: [-1, -1, 1, 1],
-                collectibles: [CollectibleItem.Gem, CollectibleItem.Key],
-                goal: reachedWater
+                collectibles: [CollectibleItem.Gem, CollectibleItem.Gem, CollectibleItem.Gem, CollectibleItem.Gem],
+                goal: collectedGems
             },
             {
                 announcement: 'Collect the Key!',
-                rows: ['water', 'stone', 'stone', 'water', 'stone', 'stone', 'grass'],
+                rows: ['stone', 'stone', 'stone', 'water', 'stone', 'stone', 'grass'],
                 cols: 5,
                 enemies: 5,
                 directions: [1, -1, 1, -1],
                 collectibles: [CollectibleItem.Gem, CollectibleItem.Gem, CollectibleItem.Key],
-                goal: reachedWater
+                goal: collectedKey
             },
             {
                 announcement: 'Collect the Star!',
-                rows: ['water', 'stone', 'stone', 'water', 'stone', 'water', 'stone', 'grass'],
+                rows: ['stone', 'water', 'stone', 'water', 'stone', 'water', 'stone', 'grass'],
                 cols: 5,
                 enemies: 6,
                 directions: [-1, 1, 1, -1],
                 collectibles: [CollectibleItem.Gem, CollectibleItem.Heart, CollectibleItem.Star],
-                goal: reachedWater
+                goal: collectedStar
             },
             {
                 announcement: 'You Won the Game!',
@@ -97,18 +95,60 @@ define(['./utils', './resources', './gameitem', './announce', './player', './ene
             }
         ];
 
-        collectibles = [];
-        allRafts = [];
-        allEnemies = [];
-        entities = [];
-        stoneRows = [];
+        /*
+         *  Define goals for levels.  Engine will check against each levels goal function
+            to determine if the App should levelUp
+        */
+        function selectedPlayer() { return (player.sprite !== ''); }
+
+        function reachedWater() { return (player.getLocation().row === 0); }
+
+        function collectedGems() {
+
+            var gems = 0;
+            player.collectibles.forEach(function(collectible) {
+                if(collectible instanceof CollectibleItem.Gem) gems++;
+            });
+            return (gems === levels[level].collectibles.length);
+        }
+
+        function collectedKey() {
+
+            return player.collectibles.some(function(collectible) {
+                return(collectible instanceof CollectibleItem.Key);
+            });
+        }
+
+        function collectedStar() {
+
+            return player.collectibles.some(function(collectible) {
+                return(collectible instanceof CollectibleItem.Star);
+            });
+        }
+
+        function wonGame() { return false; }
+
+        reset = function() {
+
+            level = 0;
+            points = 0;
+            player.lives = 3;
+
+        };
 
         init = function() {
 
-            console.log('App init: ' + levels[level].cols + ' x ' + levels[level].rows.length);
+            console.log('Level ' + level + ' init: ' + levels[level].cols + ' x ' + levels[level].rows.length);
 
-            announce.reset();
-            announce.text = levels[level].announcement;
+            var message = new Announce();
+            message.reset();
+            message.x = levels[level].cols / 2 * TILE_WIDTH + TILE_WIDTH;
+            message.y = levels[level].rows.length / 2 * TILE_HEIGHT;
+            message.text = levels[level].announcement;
+
+            announcements.push(message);
+
+            player.collectibles = [];
 
             /* Create an array of rows that will have enemies, collectibles corresponding to
              *  row numbers, and assign directions (whether the enemies move left -1 or right 1)
@@ -143,6 +183,10 @@ define(['./utils', './resources', './gameitem', './announce', './player', './ene
 
             if(level === 0) {
 
+                // Player is not active at this stage, so we'll just store it offscreen
+                // but we have to place it below the bottom row so they don't drown!
+                player.y = (levels[level].rows.length) * player.TILE_HEIGHT - player.TILE_HEIGHT/2;
+
                 // Create the Start screen for character selection
                 for(var p = 0; p < characters.length; p++) {
 
@@ -154,42 +198,11 @@ define(['./utils', './resources', './gameitem', './announce', './player', './ene
                     entities.push(character);
                 }
 
-                selector = new GameItem.MoveableItem();
-                selector.sprite = 'images/Selector.png';
-                selector.x = Math.floor(levels[level].cols / 2) * selector.TILE_WIDTH;
-                selector.y = (levels[level].rows.length - 1) * selector.TILE_HEIGHT - selector.TILE_HEIGHT/2;
-                selector.handleInput = function(dir) {
-                    var self = this;
-                    switch(dir) {
-                        case 'left':
-                            if(self.x > 0) self.x -= self.TILE_WIDTH;
-                        break;
-                        case 'right':
-                            if(self.x < (levels[level].cols - 1) * self.TILE_WIDTH) self.x += self.TILE_WIDTH;
-                        break;
-                        case 'enter':
-                            entities.forEach(function(entity) {
-                                if(entity !== self && self.checkCollision(entity)) {
-                                    player.sprite = entity.sprite;
-                                }
-                            });
-                        break;
-                        default :
-                        break;
-                    }
-
-                };
-                selector.keyHandler = function(e) {
-                    selector.handleInput(Utils.keyHandler(e.keyCode));
-                };
-                document.addEventListener('keyup', selector.keyHandler, false);
+                selector = createSelector();
 
                 // Add to the beginning of the entities array so it renders first
                 entities.unshift(selector);
 
-                // Player is not active at this stage, so we'll just store it offscreen
-                // but we have to place it below the bottom row so they don't drown!
-                player.y = (levels[level].rows.length) * player.TILE_HEIGHT - player.TILE_HEIGHT/2;
 
             } else {
 
@@ -227,7 +240,6 @@ define(['./utils', './resources', './gameitem', './announce', './player', './ene
             }
 
             return level;
-
         };
 
         getLevel = function() {
@@ -238,18 +250,99 @@ define(['./utils', './resources', './gameitem', './announce', './player', './ene
             return levels[level].goal();
         };
 
+        tryAgain = function() {
+
+            var title;
+
+            title = new Announce();
+            title.reset();
+            title.life = 1500;
+            title.x = levels[level].cols / 2 * TILE_WIDTH + TILE_WIDTH;
+            title.y = levels[level].rows.length * 0.6 * TILE_HEIGHT;
+            title.text = 'Try Again!';
+
+            announcements.push(title);
+        }
+
+        gameOver = function() {
+
+            var title, message;
+
+            title = new Announce();
+            title.reset();
+            title.life = 1000;
+            title.size = 60;
+            title.x = levels[level].cols / 2 * TILE_WIDTH + TILE_WIDTH;
+            title.y = levels[level].rows.length * 0.4 * TILE_HEIGHT;
+            title.text = 'GAME OVER!';
+
+
+            message = new Announce();
+            message.reset();
+            message.life = 1000;
+            message.x = levels[level].cols / 2 * TILE_WIDTH + TILE_WIDTH;
+            message.y = levels[level].rows.length * 0.6 * TILE_HEIGHT;
+            message.text = 'Press spacebar to Play Again!';
+
+            announcements.push(title);
+            announcements.push(message);
+
+        };
+
+        function createSelector() {
+
+            var selector = new GameItem.MoveableItem();
+            selector.x = Math.floor(levels[level].cols / 2) * selector.TILE_WIDTH;
+            selector.y = (levels[level].rows.length - 1) * selector.TILE_HEIGHT - selector.TILE_HEIGHT/2;
+
+            selector.sprite = 'images/Selector.png';
+
+            selector.handleInput = function(dir) {
+
+                var self = this;
+
+                switch(dir) {
+                    case 'left':
+                        if(self.x > 0) self.x -= self.TILE_WIDTH;
+                    break;
+                    case 'right':
+                        if(self.x < (levels[level].cols - 1) * self.TILE_WIDTH) self.x += self.TILE_WIDTH;
+                    break;
+                    case 'enter':
+                        entities.forEach(function(entity) {
+                            if(entity !== self && selector.checkCollision(entity)) {
+                                player.sprite = entity.sprite;
+                            }
+                        })
+                    break;
+                    default :
+                    break;
+                }
+
+            };
+            selector.keyHandler = function(e) {
+
+                selector.handleInput(Utils.keyHandler(e.keyCode));
+            };
+
+            document.addEventListener('keyup', selector.keyHandler, false);
+
+            return(selector);
+        };
+
+
         // Expose entities and level variables for use by the game engine
         return {
 
             // config proerties
-            TILE_HEIGHT: 83,
-            TILE_WIDTH: 101,
+            TILE_HEIGHT: TILE_HEIGHT,
+            TILE_WIDTH: TILE_WIDTH,
             levels: levels,
             points: points,
             rowImages: rowImages,
 
             // level entities
-            announce: announce,
+            announcements: announcements,
             collectibles: collectibles,
             allEnemies: allEnemies,
             allRafts: allRafts,
@@ -257,10 +350,13 @@ define(['./utils', './resources', './gameitem', './announce', './player', './ene
             entities: entities,
 
             // app methods
+            reset: reset,
             init: init,
             levelUp: levelUp,
             getLevel: getLevel,
-            completedLevel: completedLevel
+            completedLevel: completedLevel,
+            tryAgain: tryAgain,
+            gameOver: gameOver
         };
 
 });
