@@ -31,11 +31,10 @@ require(['./app', './utils', './resources'], function(App, Utils, Resources) {
             if(!paused) {
                 update(dt);
                 render();
+                lastTime = now;
+                win.requestAnimationFrame(main);
             }
 
-            lastTime = now;
-
-            win.requestAnimationFrame(main);
         }
 
         function init() {
@@ -77,27 +76,13 @@ require(['./app', './utils', './resources'], function(App, Utils, Resources) {
 
             if(App.getLevel() === 0) {
 
-                txtX = canvasInfo.width / 2;
+                App.startScreen();
                 paused = true;
                 document.addEventListener('keyup', keyHandler, false);
-
-                ctxInfo.textAlign = 'center';
-
-                ctxInfo.fillText('Ready to Play?', txtX, 280);
-                ctxInfo.strokeText('Ready to Play?', txtX, 280);
-
-                ctxInfo.font = '36px Impact, Charcoal, sans-serif';
-
-                ctxInfo.drawImage(Resources.get('images/start-key.png'), 210, 380);
-                ctxInfo.fillText('Press Spacebar to Start!', txtX, 480);
-                ctxInfo.strokeText('Press Spacebar to Start!', txtX, 480);
-
-            } else {
-                App.init();
+                render();
             }
 
-            window.scrollTo(0, canvas.height);
-
+            App.init();
         }
 
         function keyHandler(e) {
@@ -109,13 +94,9 @@ require(['./app', './utils', './resources'], function(App, Utils, Resources) {
 
             if(key === 'space') {
 
-                document.removeEventListener('keyup', keyHandler, false);
-
                 paused = false;
-
+                document.removeEventListener('keyup', keyHandler, false);
                 App.reset();
-                App.init();
-
                 main();
             }
         }
@@ -128,7 +109,8 @@ require(['./app', './utils', './resources'], function(App, Utils, Resources) {
         function updateEntities(dt) {
 
             var collision = false,
-                drown = false;
+                drown = false,
+                nxtLvl, msg;
 
             App.announcements.forEach(function(announce) {
                 if(announce.remove) App.announcements.splice(App.announcements.indexOf(announce), 1);
@@ -138,8 +120,13 @@ require(['./app', './utils', './resources'], function(App, Utils, Resources) {
             App.player.update(dt);
 
             if(App.completedLevel()) {
-                App.levelUp();
-                init();
+                if(App.getLevel === App.levels.length - 1) {
+                    App.wonGame();
+                    paused = true;
+                } else {
+                    App.levelUp();
+                    setTimeout(init, 1000);
+                }
                 return;
             }
 
@@ -173,7 +160,7 @@ require(['./app', './utils', './resources'], function(App, Utils, Resources) {
                 raft.update(dt);
 
                 if(App.player.checkCollision(raft)) {
-                    App.player.startRafting(raft);
+                    if(!App.player.onRaft) App.player.startRafting(raft);
                 }
             });
 
@@ -184,7 +171,7 @@ require(['./app', './utils', './resources'], function(App, Utils, Resources) {
             drown = App.levels[App.getLevel()].rows[App.player.getLocation().row] === 'water' && !App.player.onRaft;
 
             if(collision || drown) {
-
+                // debugger;
                 App.player.loseLife();
 
                 if(App.player.lives === 0) {
@@ -196,7 +183,8 @@ require(['./app', './utils', './resources'], function(App, Utils, Resources) {
 
                 } else {
 
-                    App.tryAgain();
+                    msg = collision ? 'You got hit' : 'You drowned';
+                    App.tryAgain(msg);
                     App.player.reset();
 
                 }

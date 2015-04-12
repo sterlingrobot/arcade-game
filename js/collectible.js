@@ -1,4 +1,4 @@
-define(['./utils', './gameitem', './resources'], function(Utils, GameItem, Resources) {
+define(['./utils', './gameitem', './announce', './resources'], function(Utils, GameItem, Announce, Resources) {
 
 'use strict';
 
@@ -61,6 +61,14 @@ define(['./utils', './gameitem', './resources'], function(Utils, GameItem, Resou
     Gem.prototype = Object.create(CollectibleItem.prototype);
 	Gem.constructor = Gem;
 	Gem.prototype.callback = function(App) {
+
+		var announcement = new Announce();
+		announcement.reset();
+		announcement.life = 1000;
+		announcement.sizes = [60];
+		announcement.messages.push('+' + this.points);
+
+		App.announcements.push(announcement);
 		App.points += this.points;
 	};
 
@@ -107,6 +115,9 @@ define(['./utils', './gameitem', './resources'], function(Utils, GameItem, Resou
 		this.sprite = 'images/Star.png';
 		this.points = 200;
 	    this.radius = 30;
+	    // always put the star on the top row
+	    this.row = rows[0];
+		this.y =  this.row.row * this.TILE_HEIGHT - this.TILE_HEIGHT * 0.4;
 	};
     Star.prototype = Object.create(CollectibleItem.prototype);
 	Star.constructor = Star;

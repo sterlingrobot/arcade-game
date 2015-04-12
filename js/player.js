@@ -29,6 +29,7 @@ define(['./utils', './resources', './gameitem'], function(Utils, Resources, Game
 
     Player.prototype.update = function(dt) {
         if(this.onRaft) this.x = this.raft.x;
+        window.scrollTo(0, Math.max(this.y, 0));
     };
 
     Player.prototype.reset = function() {

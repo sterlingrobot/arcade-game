@@ -37,7 +37,8 @@
 		"inject",
 		"expect",
 		"ctx",
-		"ctxBkgnd"
+		"ctxBkgnd",
+		"ctxInfo"
 	],
 	"indent": 4, // Specify indentation spacing
 	"devel": true, // Allow development statements e.g. `console.log();`.

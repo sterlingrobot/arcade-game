@@ -43,23 +43,12 @@ define(['./utils', './resources'], function(Utils, Resources) {
     };
     MoveableItem.prototype.getAbsoluteX = function() {
         var board = this.TILE_WIDTH * this.maxCols;
-        return this.direction > 0 ? this.x : board - this.x;
+        return this.direction > 0 ? this.x : board - this.x - this.TILE_WIDTH;
     };
-
-    var Selector = function() {
-
-		MoveableItem.call(this)
-
-        this.sprite = 'images/Selector.png';
-
-	};
-	Selector.prototype = Object.create(MoveableItem.prototype);
-	Selector.constructor = Selector;
 
 	return {
 		GameItem: GameItem,
-		MoveableItem: MoveableItem,
-		Selector: Selector
+		MoveableItem: MoveableItem
 	};
 
 });

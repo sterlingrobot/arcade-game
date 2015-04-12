@@ -39,31 +39,12 @@ define(['./utils', './resources', './gameitem'], function(Utils, Resources, Game
             this.track = Utils.getRandomIndex(this.availableRows);
             this.y = this.track.row * this.TILE_HEIGHT - (this.TILE_HEIGHT * 0.3);
             this.x = this.startX;
+            this.direction = this.track.dir;
         }
     };
 
     Enemy.prototype.isOutOfBounds = function() {
         return this.x > this.TILE_WIDTH * this.maxCols;
-    };
-
-    Enemy.prototype.changeTrack = function() {
-
-        var self = this,
-            dir = Math.floor(Math.random()*2) === 1 ? 1 : -1;
-        switch(self.track) {
-            case 1:
-                self.track++;
-            break;
-            case 2:
-                self.track = self.track + dir;
-            break;
-            case 3:
-                self.track--;
-            break;
-            default:
-            break;
-        }
-        self.y = self.track * self.TILE_HEIGHT - self.TILE_HEIGHT * 0.3;
     };
 
     return(Enemy);
