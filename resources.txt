@@ -7,4 +7,28 @@ http://requirejs.org/docs/api.html
 http://www.html5canvastutorials.com/advanced/html5-canvas-custom-transform/
 
 
+The main challenge of this project was separating concerns.  By taking an object-oriented approach,
+it became clear that best practice would be to encapsulate each entities functionality within itself,
+but that became difficult to maintain as that state was dependant on the state of the game.  So, should
+engine be controlling the app?  Then within the game loop as events happen, the engine can call the app's
+methods based on the state of the game?
 
+I decided fairly early on that some kind of AMD pattern would be necessary to give "classes" information
+about each other, and in the end I think it worked well, forcing me to consider who/what was responsible
+for determining state, but it is tempting to share too much among these entities.  For example, for the
+player selection screen, should Selector have been it's own class, inherited from MoveableItem?  I opted
+for not doing that since there was really nothing all that distinct about it other than it needed an
+event listener to move it around... but who's responsible for keeping track of that event listener?  App?
+Engine?  I decided that App should just create that entity based on the level and register the listener.
+But it seems a little messy.  Although App creates all of the entities, it seemed out of place to add the
+extra properties and instance methods within App.
+
+Similarly, should Engine be registering event listeners?  Or should it only be responsible for calling the
+game loop, updating entities and calling render methods?  I feel like App and Engine started getting overlapped.
+My idea was that App was responsible for informing Engine of the game variables: levels, points, game methods
+(levelUp, levelCompleted checking, etc), and instantiating all of the entities.  It would then be Engine's
+job to run the game loop and do collision detection and in turn inform App of necessary state changes based on
+events.  So, App is essentially the Model, and Engine is the Controller?
+
+I enjoyed this project a lot, and I feel like I ended up with an organized code base that could be extended
+without too much rework (adding additional levels and features).
