@@ -1,6 +1,6 @@
 define(['./utils', './resources', './gameitem'], function(Utils, Resources, GameItem) {
 
-'use strict';
+    'use strict';
 
     var Player = function() {
 
@@ -61,7 +61,6 @@ define(['./utils', './resources', './gameitem'], function(Utils, Resources, Game
 
     Player.prototype.loseLife = function() {
         this.lives--;
-        console.log(this.lives + ' lives left!');
     };
 
     Player.prototype.handleInput = function(dir) {

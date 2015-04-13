@@ -1,6 +1,6 @@
 define(['./utils', './gameitem', './announce', './resources'], function(Utils, GameItem, Announce, Resources) {
 
-'use strict';
+	'use strict';
 
 	var CollectibleItem = function(rows, cols) {
 
@@ -69,7 +69,7 @@ define(['./utils', './gameitem', './announce', './resources'], function(Utils, G
 		announcement.messages.push('+' + this.points);
 
 		App.announcements.push(announcement);
-		App.points += this.points;
+		App.addPoints(this.points);
 	};
 
 
@@ -87,7 +87,7 @@ define(['./utils', './gameitem', './announce', './resources'], function(Utils, G
     Key.prototype = Object.create(CollectibleItem.prototype);
 	Key.constructor = Key;
 	Key.prototype.callback = function(App) {
-		App.points += this.points;
+		App.addPoints(this.points);
 		console.log('Got Key!');
 	};
 
@@ -122,7 +122,7 @@ define(['./utils', './gameitem', './announce', './resources'], function(Utils, G
     Star.prototype = Object.create(CollectibleItem.prototype);
 	Star.constructor = Star;
 	Star.prototype.callback = function(App) {
-		App.points += this.points;
+		App.addPoints(this.points);
 	};
 
 	return {

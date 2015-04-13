@@ -1,6 +1,6 @@
 define(['./utils', './resources', './gameitem'], function(Utils, Resources, GameItem) {
 
-'use strict';
+    'use strict';
 
     var Enemy = function(tracks) {
 

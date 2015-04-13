@@ -1,6 +1,6 @@
 define(['./gameitem', './resources'], function(GameItem, Resources) {
 
-'use strict';
+	'use strict';
 
 	var Raft = function(row) {
 

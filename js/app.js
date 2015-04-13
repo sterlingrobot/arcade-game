@@ -4,8 +4,10 @@ define(['./utils', './resources', './gameitem', './announce', './player', './ene
 
     function(Utils, Resources, GameItem, Announce, Player, Enemy, CollectibleItem, Raft) {
 
+        var debug = false;
         var level, points, rowImages, characters, levels, TILE_WIDTH, TILE_HEIGHT,
-            reset, init, levelUp, getLevel, completedLevel, startScreen, tryAgain, gameOver, wonGame,
+            reset, init, levelUp, getLevel, getPoints, addPoints, completedLevel,
+            startScreen, tryAgain, gameOver, wonGame,
             player, allEnemies, collectibles, allRafts,
             entities, announcements, selector, stoneRows;
 
@@ -86,7 +88,7 @@ define(['./utils', './resources', './gameitem', './announce', './player', './ene
                 announceImg: 'images/player-keys.png',
                 rows: ['water', 'stone', 'stone', 'stone', 'grass', 'grass'],
                 cols: 5,
-                enemies: 3,
+                enemies: debug ? 0 : 3,
                 directions: [1, -1, 1],
                 collectibles: [CollectibleItem.Gem],
                 goal: reachedWater
@@ -96,7 +98,7 @@ define(['./utils', './resources', './gameitem', './announce', './player', './ene
                 announceImg: '',
                 rows: ['stone', 'stone', 'stone', 'water', 'stone', 'stone', 'grass'],
                 cols: 5,
-                enemies: 4,
+                enemies: debug ? 0 : 4,
                 directions: [-1, -1, 1, 1],
                 collectibles: [CollectibleItem.Gem, CollectibleItem.Gem, CollectibleItem.Gem, CollectibleItem.Gem],
                 goal: collectedGems
@@ -106,7 +108,7 @@ define(['./utils', './resources', './gameitem', './announce', './player', './ene
                 announceImg: '',
                 rows: ['stone', 'stone', 'stone', 'water', 'stone', 'stone', 'grass'],
                 cols: 5,
-                enemies: 5,
+                enemies: debug ? 0 : 5,
                 directions: [1, -1, 1, -1],
                 collectibles: [CollectibleItem.Gem, CollectibleItem.Gem, CollectibleItem.Key],
                 goal: collectedKey
@@ -116,7 +118,7 @@ define(['./utils', './resources', './gameitem', './announce', './player', './ene
                 announceImg: '',
                 rows: ['stone', 'water', 'stone', 'water', 'stone', 'water', 'stone', 'grass'],
                 cols: 5,
-                enemies: 6,
+                enemies: debug ? 0 : 6,
                 directions: [-1, 1, 1, -1],
                 collectibles: [CollectibleItem.Gem, CollectibleItem.Heart, CollectibleItem.Star],
                 goal: collectedStar
@@ -260,6 +262,14 @@ define(['./utils', './resources', './gameitem', './announce', './player', './ene
             return level;
         };
 
+        getPoints = function() {
+            return points;
+        };
+
+        addPoints = function(pts) {
+            points += pts;
+        };
+
         completedLevel = function() {
             return levels[level].goal();
         };
@@ -316,8 +326,10 @@ define(['./utils', './resources', './gameitem', './announce', './player', './ene
             announcement = new Announce();
             announcement.reset();
             announcement.life = 1000;
-            announcement.sizes = [60, 48];
-            announcement.messages('YOU WON!', 'You got ' + points + ' points!');
+            announcement.sizes = [60, 48, 48];
+            announcement.messages.push('YOU WON!', 'You got ' + getPoints() + ' points!');
+            announcement.messages.push('Play Again?');
+            announcement.sprite = 'images/start-key.png';
 
             announcements.push(announcement);
 
@@ -372,7 +384,6 @@ define(['./utils', './resources', './gameitem', './announce', './player', './ene
             TILE_HEIGHT: TILE_HEIGHT,
             TILE_WIDTH: TILE_WIDTH,
             levels: levels,
-            points: points,
             rowImages: rowImages,
 
             // level entities
@@ -388,6 +399,8 @@ define(['./utils', './resources', './gameitem', './announce', './player', './ene
             init: init,
             levelUp: levelUp,
             getLevel: getLevel,
+            getPoints: getPoints,
+            addPoints: addPoints,
             completedLevel: completedLevel,
             startScreen: startScreen,
             tryAgain: tryAgain,

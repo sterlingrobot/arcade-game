@@ -1,5 +1,5 @@
 requirejs.config({
-    baseUrl: '/nanodegree/arcade-game/js'
+    baseUrl: window.location.href + '/js'
 });
 
 require(['./app', './utils', './resources'], function(App, Utils, Resources) {
@@ -120,12 +120,13 @@ require(['./app', './utils', './resources'], function(App, Utils, Resources) {
             App.player.update(dt);
 
             if(App.completedLevel()) {
-                if(App.getLevel === App.levels.length - 1) {
+                if(App.getLevel() === App.levels.length - 1) {
                     App.wonGame();
                     paused = true;
+                    document.addEventListener('keyup', keyHandler, false);
                 } else {
                     App.levelUp();
-                    setTimeout(init, 1000);
+                    setTimeout(init, 800);
                 }
                 return;
             }
@@ -217,7 +218,7 @@ require(['./app', './utils', './resources'], function(App, Utils, Resources) {
 
             var x = (App.levels[App.getLevel()].cols + 1) * App.TILE_WIDTH,
                 livesTxt = 'Lives:',
-                pointsTxt = App.points,
+                pointsTxt = App.getPoints(),
                 collectibleY = 50;
 
             ctxInfo.clearRect(0, 0, canvasInfo.width, canvasInfo.height);

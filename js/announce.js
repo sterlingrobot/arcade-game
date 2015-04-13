@@ -66,7 +66,7 @@ define(['./utils', './resources', './gameitem'], function(Utils, Resources, Game
     };
 
     Announce.prototype.reset = function() {
-        this.life = 8000;
+        this.life = 10000;
         this.size = 48;
     };
 
