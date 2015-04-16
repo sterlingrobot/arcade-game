@@ -1,0 +1,25 @@
+{
+  "name": "arcade-game",
+  "version": "1.0.0",
+  "homepage": "https://github.com/sterlingrobot/arcade-game",
+  "authors": [
+    "Tor Gilbertson <sterlingrobot@gmail.com>"
+  ],
+  "description": "Udacity Front End Nanodegree Project 3",
+  "main": "js/engine.js",
+  "keywords": [
+    "object-oriented-javascript"
+  ],
+  "license": "ISC",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "/vendor",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "requirejs": "~2.1.16"
+  }
+}
