@@ -4,9 +4,8 @@ Bug Attack
 ###Classic Arcade Game Clone###
 for Udacity Front End Web Developer Nanodegree
 
-In this project, I explored writing clean Object-oriented Javascript to recreate a classic
-Frogger-like Arcade Game with HTML5 Canvas.  Using [RequireJS](http:/requirejs.org), I
-used a module pattern to simplify object dependencies and encapsulate functionality of
+This project recreates a classic Frogger-like Arcade Game with HTML5 Canvas and Object-oriented Javascript.
+[RequireJS](http:/requirejs.org) simplifies object dependencies and encapsulates functionality of
 the entities.
 
 
@@ -16,11 +15,15 @@ Can you add your own level or a new entity?
 
 
 - Clone the project on your desktop
-```javascript
-git clone git@github.com:sterlingrobot/arcade-game.git
+```git
+mkdir arcade-game
+
+git clone git@github.com:sterlingrobot/arcade-game.git arcade-game
+
+cd arcade-game
 ```
 - Install the dependencies
-```javascript
+```
 npm install
 bower install
 ```
@@ -31,9 +34,4 @@ bower install
 - **Most importantly, avoid the bugs!**
 - Tip: Water is good in Level 1, but you'll need a raft in the next levels so you don't drown!
 
-Students should use this rubric: [https://www.udacity.com/course/viewer#!/c-ud015/l-3072058665/m-3072588797](https://www.udacity.com/course/viewer#!/c-ud015/l-3072058665/m-3072588797)
-for self-checking their submission.
-
 **See the completed project at** [http://sterlingrobot.github.io/arcade-game](http://sterlingrobot.github.io/arcade-game/)
-
-
